@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# State files (runtime artifacts, not for version control)
+*.state
+*.hashes
+*.device_seen
+
+# Logs
+*.log
