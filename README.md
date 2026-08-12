@@ -341,6 +341,13 @@ bash uninstall.sh
 
 ---
 
+## You might also like
+
+- [restic-backup-toolkit](https://github.com/andersyin/restic-backup-toolkit) — 3-tier macOS backup: rsync mirror + restic cold backup + SHA256 audit
+- [md-reader](https://github.com/andersyin/md-reader) — Zero-dependency single-file HTML markdown reader, 77KB, no install
+
+---
+
 ## Star History
 
 <div align="center">
