@@ -11,6 +11,7 @@ EXIF date archiving, content-hash dedup, zero cloud dependency.
 ![Dependencies](https://img.shields.io/badge/dependencies-libimobiledevice%20%2B%20exiftool-orange.svg)
 ![ShellCheck](https://img.shields.io/github/actions/workflow/status/andersyin/iphone-auto-backup/shellcheck.yml?label=shellcheck)
 ![Stars](https://img.shields.io/github/stars/andersyin/iphone-auto-backup?style=social)
+![Forks](https://img.shields.io/github/forks/andersyin/iphone-auto-backup?style=social)
 ![Release](https://img.shields.io/github/v/release/andersyin/iphone-auto-backup)
 
 [English](#features) | [中文文档](#中文文档)
@@ -22,6 +23,14 @@ EXIF date archiving, content-hash dedup, zero cloud dependency.
 ## Why this exists
 
 Every time you plug in your iPhone, macOS wants to open Photos.app or Image Capture — but neither gives you **automatic, deduplicated, date-sorted** backups to an external drive. iCloud costs money and locks you in. iMazing is $40+. This tool does it for free, with zero cloud, and runs entirely via `launchd` + `libimobiledevice`.
+
+### Who is this for?
+
+- **Photographers** — auto-archive iPhone shoots by EXIF date, no manual sorting
+- **Parents** — never lose a baby photo again; plug in and it backs up
+- **Data hoarders** — content-hash dedup means zero redundant copies
+- **Privacy-conscious users** — zero cloud, zero tracking, files on your disk
+- **Anyone with an iPhone** — if you have photos on your phone, you need backup
 
 ## Features
 
@@ -323,5 +332,21 @@ bash uninstall.sh
 <div align="center">
 
 **If this tool saved your photos, consider giving it a ⭐**
+
+[Report a bug](https://github.com/andersyin/iphone-auto-backup/issues/new?template=bug_report.md) ·
+[Request a feature](https://github.com/andersyin/iphone-auto-backup/issues/new?template=feature_request.md) ·
+[Contributing](CONTRIBUTING.md)
+
+</div>
+
+---
+
+## Star History
+
+<div align="center">
+
+<a href="https://star-history.com/#andersyin/iphone-auto-backup&Date">
+  <img src="https://api.star-history.com/svg?repos=andersyin/iphone-auto-backup&type=Date" alt="Star History Chart" width="600">
+</a>
 
 </div>
