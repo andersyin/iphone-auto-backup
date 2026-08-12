@@ -9,7 +9,9 @@ EXIF date archiving, content-hash dedup, zero cloud dependency.
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)
 ![Language](https://img.shields.io/badge/language-Bash-green.svg)
 ![Dependencies](https://img.shields.io/badge/dependencies-libimobiledevice%20%2B%20exiftool-orange.svg)
+![ShellCheck](https://img.shields.io/github/actions/workflow/status/andersyin/iphone-auto-backup/shellcheck.yml?label=shellcheck)
 ![Stars](https://img.shields.io/github/stars/andersyin/iphone-auto-backup?style=social)
+![Release](https://img.shields.io/github/v/release/andersyin/iphone-auto-backup)
 
 [English](#features) | [中文文档](#中文文档)
 
