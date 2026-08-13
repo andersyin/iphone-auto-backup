@@ -15,11 +15,8 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=config.sh
 source "$SCRIPT_DIR/config.sh"
-
-AFCCLIENT="/opt/homebrew/bin/afcclient"
-IDEVICEPAIR="/opt/homebrew/bin/idevicepair"
-EXIFTOOL="/opt/homebrew/bin/exiftool"
 
 # ---------- 路径 ----------
 STATE_FILE="$HOME/.iphone_photo_backup_v3.state"
@@ -299,7 +296,7 @@ get_photo_timestamp() {
 is_photo() {
     local ext="${1##*.}"
     ext=$(echo "$ext" | tr '[:lower:]' '[:upper:]')
-    [[ " JPG JPEG HEIC PNG GIF " =~ " $ext " ]]
+    [[ " $PHOTO_EXTENSIONS " == *" $ext "* ]]
 }
 
 # ---------- 同步时内容分类（与 media_index_tools.py classify_content_type 对齐）----------
@@ -378,12 +375,12 @@ classify_photo_type() {
     ext=$(echo "$ext" | tr '[:lower:]' '[:upper:]')
 
     # HEIC = iPhone 相机原生格式（iOS 截图一律 PNG）
-    if [[ " HEIC HEIF " =~ " $ext " ]]; then
+    if [[ " HEIC HEIF " == *" $ext "* ]]; then
         echo "photo"; return
     fi
 
     # GIF/WebP → 存图
-    if [[ " GIF WEBP " =~ " $ext " ]]; then
+    if [[ " GIF WEBP " == *" $ext "* ]]; then
         echo "saved_image"; return
     fi
 
@@ -406,7 +403,7 @@ classify_photo_type() {
     fi
 
     # JPG/JPEG/TIFF：多级判定
-    if [[ " JPG JPEG TIF TIFF " =~ " $ext " ]]; then
+    if [[ " JPG JPEG TIF TIFF " == *" $ext "* ]]; then
         # 屏幕分辨率 → 截图（无论有无 EXIF）
         if [[ -n "$dims" ]] && _dims_match "$dims" "screen"; then
             echo "screenshot"; return
@@ -465,7 +462,17 @@ count_backup_files() {
 
 # ---------- 主流程 ----------
 main() {
-    mkdir -p "$PHOTO_BACKUP_ROOT"
+    if config_has_placeholders; then
+        prerr "config.sh 仍是占位路径 YourExternalDrive，请先修改 PHOTO_BACKUP_ROOT"
+        notify "iPhone 照片备份未配置" "请先编辑 config.sh，将 YourExternalDrive 改成你的磁盘名。"
+        exit 1
+    fi
+    local missing_vol=""
+    if ! missing_vol=$(ensure_backup_root "$PHOTO_BACKUP_ROOT"); then
+        prerr "备份盘未挂载或不存在: $missing_vol"
+        notify "iPhone 照片备份失败" "外置磁盘未挂载: $missing_vol"
+        exit 1
+    fi
     touch_state
 
     # ---------- iPhone 检查 ----------

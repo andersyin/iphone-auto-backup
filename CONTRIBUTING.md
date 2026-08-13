@@ -32,9 +32,18 @@ Thanks for your interest in contributing! This is a small, focused tool, so the 
 ```bash
 git clone https://github.com/andersyin/iphone-auto-backup.git
 cd iphone-auto-backup
-bash install.sh  # sets up dependencies
-nano config.sh   # point to a test directory
+nano config.sh   # required: replace YourExternalDrive before install
+bash install.sh  # Homebrew deps + launchd (macOS)
 ```
+
+Before opening a PR:
+
+```bash
+bash -n *.sh
+shellcheck --severity=warning --format=gcc *.sh
+```
+
+Linux CI cannot exercise USB / launchd / libimobiledevice. Prefer ShellCheck plus a real-Mac smoke test when you change backup behavior.
 
 ## Reporting bugs
 

@@ -25,11 +25,8 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=config.sh
 source "$SCRIPT_DIR/config.sh"
-
-AFCCLIENT="/opt/homebrew/bin/afcclient"
-IDEVICEPAIR="/opt/homebrew/bin/idevicepair"
-EXIFTOOL="/opt/homebrew/bin/exiftool"
 
 # ---------- 路径 ----------
 STATE_FILE="$HOME/.iphone_video_backup_v3.state"
@@ -303,7 +300,7 @@ get_video_timestamp() {
 is_video() {
     local ext="${1##*.}"
     ext=$(echo "$ext" | tr '[:lower:]' '[:upper:]')
-    [[ " $VIDEO_EXTENSIONS " =~ " $ext " ]]
+    [[ " $VIDEO_EXTENSIONS " == *" $ext "* ]]
 }
 
 tmp_path_for() {
@@ -340,7 +337,17 @@ count_backup_files() {
 
 # ---------- 主流程 ----------
 main() {
-    mkdir -p "$BACKUP_ROOT"
+    if config_has_placeholders; then
+        prerr "config.sh 仍是占位路径 YourExternalDrive，请先修改 BACKUP_ROOT"
+        notify "iPhone 视频备份未配置" "请先编辑 config.sh，将 YourExternalDrive 改成你的磁盘名。"
+        exit 1
+    fi
+    local missing_vol=""
+    if ! missing_vol=$(ensure_backup_root "$BACKUP_ROOT"); then
+        prerr "备份盘未挂载或不存在: $missing_vol"
+        notify "iPhone 视频备份失败" "外置磁盘未挂载: $missing_vol"
+        exit 1
+    fi
     touch_state
 
     # ---------- iPhone 检查 ----------
