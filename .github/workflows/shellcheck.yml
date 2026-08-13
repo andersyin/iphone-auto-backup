@@ -4,16 +4,28 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   shellcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Bash syntax check
+        run: |
+          failed=0
+          for f in *.sh; do
+            if bash -n "$f"; then
+              echo "OK: $f"
+            else
+              echo "FAIL: $f"
+              failed=1
+            fi
+          done
+          exit "$failed"
+
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          severity: error
-          format: gcc
-          ignore_paths: .git
+        run: shellcheck --severity=warning --format=gcc *.sh

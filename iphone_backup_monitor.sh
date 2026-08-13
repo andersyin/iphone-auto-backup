@@ -6,10 +6,8 @@
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=config.sh
 source "$SCRIPT_DIR/config.sh"
-
-IDEVICE_ID="/opt/homebrew/bin/idevice_id"
-IDEVICEPAIR="/opt/homebrew/bin/idevicepair"
 STATUS_FILE="/tmp/iphone_backup_monitor.status"
 LOCKDIR="/tmp/iphone_backup_monitor.lockdir"
 : "${IPHONE_MONITOR_INTERVAL:=10}"
@@ -117,7 +115,7 @@ while true; do
         now=$(date +%s)
         write_status "waiting_trust" "$current" "unlock iPhone and trust this computer"
         if (( now - trust_notice_at >= 60 )); then
-            notify "iPhone 等待授权" "请解锁手机并点击“信任此电脑”。"
+            notify "iPhone 等待授权" "请解锁手机并点击「信任此电脑」。"
             trust_notice_at=$now
         fi
         sleep "$IPHONE_MONITOR_INTERVAL"

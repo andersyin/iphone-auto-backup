@@ -1,11 +1,25 @@
 #!/bin/bash
 # iPhone 安全备份 v1 — 只复制，不删除，不清理
+# Legacy helper (not used by launchd). Prefer backup_videos_v3.sh / backup_photos_v3.sh.
 
-AFCCLIENT="/opt/homebrew/bin/afcclient"
-IDEVICEPAIR="/opt/homebrew/bin/idevicepair"
-BACKUP_ROOT="/Volumes/YourExternalDrive/iPhone_Videos"
-PHOTO_BACKUP_ROOT="/Volumes/YourExternalDrive/iPhone_Photos"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=config.sh
+source "$SCRIPT_DIR/config.sh"
+
 TMP_DIR="/tmp/iphone_safe_backup_tmp"
+
+if config_has_placeholders; then
+    echo "[ERR] config.sh still has YourExternalDrive placeholders; edit BACKUP_ROOT / PHOTO_BACKUP_ROOT first"
+    exit 1
+fi
+if ! vol=$(ensure_backup_root "$BACKUP_ROOT"); then
+    echo "[ERR] 视频备份盘未挂载: $vol"
+    exit 1
+fi
+if ! vol=$(ensure_backup_root "$PHOTO_BACKUP_ROOT"); then
+    echo "[ERR] 照片备份盘未挂载: $vol"
+    exit 1
+fi
 
 LOCKFILE="/tmp/iphone_safe_backup.lock"
 if [[ -f "$LOCKFILE" ]]; then echo "[INFO] 已在运行，退出"; exit 0; fi

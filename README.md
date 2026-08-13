@@ -99,14 +99,24 @@ iPhone (USB)
 git clone https://github.com/andersyin/iphone-auto-backup.git
 cd iphone-auto-backup
 
-# 2. Install (auto-installs libimobiledevice + exiftool via Homebrew, registers launchd)
-bash install.sh
-
-# 3. Edit config to point to your external drive
+# 2. Edit config FIRST — install refuses the YourExternalDrive placeholders
 nano config.sh
+# Set BACKUP_ROOT and PHOTO_BACKUP_ROOT to your disk, e.g.
+#   BACKUP_ROOT="/Volumes/MyDrive/iPhone_Videos"
+#   PHOTO_BACKUP_ROOT="/Volumes/MyDrive/iPhone_Photos"
+
+# 3. Install (Homebrew deps + launchd). Apple Silicon and Intel brew prefixes are auto-detected.
+bash install.sh
 ```
 
-Plug in your iPhone → trust the computer → backup runs automatically.
+### First run
+
+1. Mount the external drive named in `config.sh`.
+2. Plug in the iPhone, unlock it, and tap **Trust This Computer**.
+3. Watch progress: `cat /tmp/iphone_backup_monitor.status`
+4. Optional smoke test without waiting for USB: `bash backup_videos_v3.sh` / `bash backup_photos_v3.sh`
+
+Backup scripts will not create a fake folder under `/Volumes` if the disk is unmounted; they notify and exit instead.
 
 ## Terminal Demo
 
@@ -180,7 +190,7 @@ $ bash backup_videos_v3.sh
 | `PHOTO_BACKUP_ROOT` | Photo backup target path | `/Volumes/YourExternalDrive/iPhone_Photos` |
 | `VIDEO_EXTENSIONS` | Supported video formats | `MOV MP4 M4V 3GP AVI MKV` |
 | `PHOTO_EXTENSIONS` | Supported photo formats | `JPG JPEG HEIC PNG GIF` |
-| `AUTO_REFRESH_INDEX` | Run `refresh_index.sh` after backup if available | `0` (off) |
+| `AUTO_REFRESH_INDEX` | Run optional sibling `refresh_index.sh` after backup (not shipped here) | `0` (off) |
 
 ## Dependencies
 
@@ -193,9 +203,9 @@ $ bash backup_videos_v3.sh
 
 ## Requirements
 
-- macOS (Apple Silicon preferred; Intel Macs change `/opt/homebrew/bin` → `/usr/local/bin`)
+- macOS (Apple Silicon or Intel; Homebrew tools are resolved from `/opt/homebrew/bin`, `/usr/local/bin`, or `PATH`)
 - iPhone with USB connection (must click "Trust This Computer")
-- External drive or designated backup directory
+- External drive or designated backup directory (edit `config.sh` before `install.sh`)
 
 ## Manual Run
 
@@ -237,8 +247,11 @@ A: Make sure you clicked "Trust This Computer" on the iPhone. Re-run `bash insta
 **Q: Same video backed up twice?**
 A: v3 uses content-hash dedup (first/last 512KB + file size → SHA1). The hash index lives at `~/.iphone_video_backup_v3.hashes`.
 
+**Q: `install.sh` exits and says config still has placeholders?**
+A: Edit `config.sh` first. `YourExternalDrive` is a sample name; install will not register launchd until `BACKUP_ROOT` and `PHOTO_BACKUP_ROOT` point at a real path.
+
 **Q: External drive wasn't mounted, backup failed?**
-A: The script logs the error and sends a notification without crashing. Run manually once the drive is mounted:
+A: The script notifies you and exits without creating a fake directory under `/Volumes`. Mount the disk and re-run:
 ```bash
 bash backup_videos_v3.sh
 bash backup_photos_v3.sh
@@ -256,12 +269,14 @@ This only removes the launchd config. Scripts, backup data, and hash indexes are
 bash uninstall.sh
 ```
 
-To completely wipe all data:
+To wipe indexes only (backup files stay):
 ```bash
 rm -f ~/.iphone_video_backup_v3.hashes ~/.iphone_photo_backup_v3.hashes
 rm -f ~/.iphone_video_backup_v3.device_seen ~/.iphone_photo_backup_v3.device_seen
-rm -rf /Volumes/YourExternalDrive/iPhone_Videos /Volumes/YourExternalDrive/iPhone_Photos
+rm -f ~/.iphone_video_backup_v3.state ~/.iphone_photo_backup_v3.state
 ```
+
+To delete backup files, use the paths from your `config.sh` — do not copy the placeholder `/Volumes/YourExternalDrive/...`.
 
 ## Contributing
 
@@ -293,11 +308,12 @@ iPhone 插入 Mac 时自动备份视频和照片到外置硬盘，按 EXIF 拍�
 ```bash
 git clone https://github.com/andersyin/iphone-auto-backup.git
 cd iphone-auto-backup
-bash install.sh    # 自动安装依赖 + 注册 launchd
-nano config.sh     # 改成你的外置硬盘路径
+nano config.sh     # 必须先改路径；install 会拒绝 YourExternalDrive 占位名
+bash install.sh    # 自动安装依赖 + 注册 launchd（Apple Silicon / Intel Homebrew 均可）
 ```
 
-插入 iPhone → 信任电脑 → 自动开始备份。
+插入 iPhone → 解锁并点击「信任此电脑」→ 确认外置盘已挂载 → 自动开始备份。
+查看状态：`cat /tmp/iphone_backup_monitor.status`
 
 ### 配置说明
 
@@ -307,7 +323,7 @@ nano config.sh     # 改成你的外置硬盘路径
 | `PHOTO_BACKUP_ROOT` | 照片备份目标路径 | `/Volumes/YourExternalDrive/iPhone_Photos` |
 | `VIDEO_EXTENSIONS` | 支持的视频格式 | `MOV MP4 M4V 3GP AVI MKV` |
 | `PHOTO_EXTENSIONS` | 支持的照片格式 | `JPG JPEG HEIC PNG GIF` |
-| `AUTO_REFRESH_INDEX` | 备份后自动刷新媒体索引 | `0`（关闭） |
+| `AUTO_REFRESH_INDEX` | 备份后跑可选的 `refresh_index.sh`（本仓库不附带） | `0`（关闭） |
 
 ### 依赖
 
@@ -323,6 +339,9 @@ A: 确认 iPhone 已点击「信任此电脑」；重新运行 `bash install.sh`
 
 **Q: 重复备份同一个视频？**
 A: v3 使用内容哈希去重，哈希索引位于 `~/.iphone_video_backup_v3.hashes`。
+
+**Q: 安装时报占位路径？**
+A: 先改 `config.sh` 里的 `BACKUP_ROOT` / `PHOTO_BACKUP_ROOT`，再运行 `bash install.sh`。
 
 **Q: 怎么卸载？**
 ```bash

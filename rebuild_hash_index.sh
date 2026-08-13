@@ -14,6 +14,7 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=config.sh
 source "$SCRIPT_DIR/config.sh"
 
 HASH_INDEX="$HOME/.iphone_photo_backup_v3.hashes"
@@ -39,6 +40,14 @@ hash_seen() { grep -qx "$1" "$HASH_INDEX" 2>/dev/null; }
 main() {
     echo ""
     pr "==== 照片哈希索引重建 ===="
+    if config_has_placeholders; then
+        echo "config.sh 仍是占位路径 YourExternalDrive，请先修改 PHOTO_BACKUP_ROOT"
+        exit 1
+    fi
+    if [[ ! -d "$PHOTO_BACKUP_ROOT" ]]; then
+        echo "PHOTO_BACKUP_ROOT 不存在（磁盘未挂载？）: $PHOTO_BACKUP_ROOT"
+        exit 1
+    fi
     $DRY_RUN && pr "（DRY-RUN 模式：只统计，不写入）"
     pr "扫描目录: $PHOTO_BACKUP_ROOT"
     pr "索引文件: $HASH_INDEX"
